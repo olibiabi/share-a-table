@@ -42,7 +42,7 @@ const toastFilter = t => `sepia(${Math.min(1, t * 1.4).toFixed(2)}) saturate(${(
 
 // preload so nothing pops in mid-game
 ['plate0', 'plate1', 'plate2', 'plate3', 'plate4', 'soup', 'cilantro', 'pizza', 'pineapple', 'pineapplebowl', 'bread', 'toaster',
-  'cerealbox', 'milk', 'bowlempty', 'bowlfull', 'egg', 'hotsauce', 'flame', 'chili', 'cake', 'strawberry', 'hull', 'pizzabox',
+  'cerealbox', 'milk', 'bowlempty', 'bowlfull', 'egg', 'hotsauce', 'flame', 'chili', 'cake', 'strawberry', 'hull', 'pizzabox', 'pizzaboxclosed',
   'slice', 'tomato', 'tablecloth', 'susan', 'napkin'].forEach(n => { new Image().src = src(n); });
 
 /* ---------- plates ---------- */
@@ -558,8 +558,8 @@ const SETUP = {
   },
 
   slice(stage, ui) {
-    addItem(stage, { x: 38, y: 44, w: 62, name: 'pizzabox', cls: 'still' });
-    stage.insertAdjacentHTML('beforeend', `<div class="lid" id="lid">see you tomorrow</div>`);
+    const openBox = addItem(stage, { x: 38, y: 44, w: 62, name: 'pizzabox', cls: 'still' });
+    const closedBox = addItem(stage, { x: 38, y: 58, w: 50, name: 'pizzaboxclosed', cls: 'still boxclosed' });
     addItem(stage, { x: 83, y: 82, w: 30, name: PLATES[me.plate].src, cls: 'still' });
     const slice = addItem(stage, { x: 38, y: 62, w: 24, name: 'slice', rot: -20 });
     let decided = false;
@@ -578,7 +578,8 @@ const SETUP = {
     $('#closeLid').onclick = () => {
       if (decided) return;
       decided = true; me.lastSlice = 0;
-      $('#lid').classList.add('closed'); slice.style.opacity = 0;
+      slice.style.transition = 'opacity .2s'; slice.style.opacity = 0;
+      openBox.classList.add('gone'); closedBox.classList.add('show');
       $('#closeLid').disabled = true;
       ui.ready('You closed the lid. Someone else will be very happy.');
     };

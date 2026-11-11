@@ -10,6 +10,7 @@ A = {
   "bowlcereal": ("bowlempty", "The exact same red ceramic bowl with white polka dots from the reference image, same angle and size, now filled with only dry orange and yellow ring cereal heaped up. No milk at all."),
   "bowlmilk": ("bowlempty", "The exact same red ceramic bowl with white polka dots from the reference image, same angle and size, now filled with only plain white milk. No cereal, nothing floating."),
   "bowlfull": ("bowlempty", "The exact same red ceramic bowl with white polka dots from the reference image, same angle and size, now filled with white milk with orange and yellow ring cereal floating on top."),
+  "pizzaboxclosed": ("pizzabox", "The exact same brown cardboard pizza box from the reference image, now with the lid fully closed, seen from directly above: a plain closed square cardboard box lid with soft folded edges and a small grease spot."),
   "cerealpour": ("cerealbox", "The exact same yellow cereal box from the reference image, tilted about 120 degrees to the right so its open top points down and to the right, with a short stream of orange and yellow ring cereal falling straight down out of it."),
   "milkpour": ("milk", "The exact same white milk carton with a blue stripe from the reference image, tilted about 120 degrees to the left so its open spout points down and to the left, with a smooth stream of white milk pouring straight down from the spout. The background must be plain pure white, no colored shapes or patches behind it."),
 }
