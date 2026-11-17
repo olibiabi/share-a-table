@@ -299,10 +299,13 @@ function renderIntro() {
   app.innerHTML = `<section class="intro two">
     <div class="setting theirs">${settingHTML('plate4', 'chopsticks', '<span class="placecard">reserved for&nbsp;?</span>')}</div>
     <div class="intro-card">
-      <p class="sub">same table, different plates</p>
-      <h1>Share a <em>Table</em></h1>
-      <p class="lede">A table for two — but who sits across from you? Eat eight small things. No questions: just pick out, pour, shake and bite. Then the table rearranges itself around you, and you'll see who you'd actually get along with.</p>
-      <button class="btn" id="go">Take a seat</button>
+      ${img('plate2', '')}
+      <div class="on-plate">
+        <p class="sub">[ same table, different plates ]</p>
+        <h1>Share a <em>Table</em></h1>
+        <p class="lede">A table for two. Eat eight small things, then find out who sits across from you.</p>
+        <button class="btn" id="go">Take a seat</button>
+      </div>
     </div>
     <div class="setting mine">${settingHTML('plate1', 'western', '<span class="placecard you">you</span>')}</div>
   </section>`;
@@ -313,7 +316,7 @@ function renderPlateDraw() {
   setSteps(-1);
   app.innerHTML = `<section class="course">
     <div class="text">
-      <p class="no">Before we eat</p>
+      <p class="no">[ before we eat ]</p>
       <h1>Your plate</h1>
       <p class="prompt">Everyone at this table gets a plate. You don't choose it — it's handed to you, like the universe you were born into.</p>
       <p class="feedback" id="fb"></p>
@@ -340,7 +343,7 @@ function renderCourse(i) {
   setSteps(i); setHeat(0);
   app.innerHTML = `<section class="course">
     <div class="text">
-      <p class="no">Course No. ${i + 1}</p>
+      <p class="no">[ course ${i + 1} ]</p>
       <h1>${c.title}</h1>
       <p class="prompt">${c.prompt}</p>
       <p class="feedback" id="fb"></p>
@@ -655,15 +658,15 @@ function renderTable() {
   const ps = persona(me);
   app.innerHTML = `<section class="table-screen">
     <aside class="me-panel">
-      <p class="eyebrow">${esc(me.name === 'You' ? 'your' : me.name + "'s")} plate</p>
+      <p class="eyebrow">[ ${esc(me.name === 'You' ? 'your' : me.name + "'s")} plate ]</p>
       <div class="me-plate">${plateHTML(me)}</div>
       <h2 class="persona">${ps.title}</h2>
-      <ul class="traits">${ps.traits.slice(0, 5).map(t => `<li>${t}</li>`).join('')}</ul>
+      <ul class="traits">${ps.traits.slice(0, 3).map(t => `<li>${t}</li>`).join('')}</ul>
       <p class="napkin-mini">“${esc(me.dish)}” — ${esc(me.memory)}</p>
       <button class="btn ghost" id="again">eat again</button>
     </aside>
     <div class="table-wrap">
-      <p class="hint">Grab the lazy Susan and spin it — whichever dish stops in front of you, the table rearranges around it.</p>
+      <p class="hint">Grab the lazy Susan and give it a spin.</p>
       <p class="count" id="count"></p>
       <div class="table" id="table">
         <div class="cloth">${img('tablecloth')}</div>
@@ -683,17 +686,17 @@ function renderTable() {
   $('#again').onclick = renderIntro;
 
   const seatsEl = $('#seats');
-  const seatPos = deg => ({ x: 50 + Math.cos(deg * Math.PI / 180) * 41, y: 50 + Math.sin(deg * Math.PI / 180) * 41 });
+  const seatPos = deg => ({ x: 50 + Math.cos(deg * Math.PI / 180) * 44, y: 50 + Math.sin(deg * Math.PI / 180) * 44 });
   const youPos = seatPos(90);
   let people = [], focus = 'all', rot = 0, selected = null;
 
   const build = () => {
     people = tablePeople();
     seatsEl.innerHTML = `<div class="seat me" style="left:${youPos.x}%;top:${youPos.y}%"><div class="p">${plateHTML(me)}</div><span class="nm">${esc(me.name)}</span></div>` +
-      people.map((p, i) => `<button class="seat" data-i="${i}" style="left:50%;top:50%"><div class="p">${plateHTML(p)}</div><span class="nm">${esc(p.name)}${p.sample ? ' <small>sample</small>' : ''}</span><span class="ds"></span></button>`).join('');
+      people.map((p, i) => `<button class="seat" data-i="${i}" style="left:50%;top:50%"><div class="p">${plateHTML(p)}</div><span class="nm">${esc(p.name)}</span><span class="ds"></span></button>`).join('');
     const real = people.filter(p => !p.sample).length;
-    $('#count').textContent = real === 0 ? 'No classmates here yet — you are the first. Sample diners are keeping you company.'
-      : `${real} classmate${real === 1 ? '' : 's'} at this table${real < 7 ? ' · empty seats filled with sample diners' : ''}`;
+    $('#count').textContent = real === 0 ? 'you are the first one here · sample diners are keeping you company'
+      : `${real} classmate${real === 1 ? '' : 's'} at the table${real < 7 ? ' · the rest are sample diners' : ''}`;
     selected = null;
   };
   const arrange = () => {
@@ -707,8 +710,8 @@ function renderTable() {
       el.classList.remove('folded');
       const pos = seatPos(SEATS[k]);
       el.style.left = pos.x + '%'; el.style.top = pos.y + '%';
-      el.style.opacity = (0.4 + 0.6 * ((s - lo) / (hi - lo || 1))).toFixed(2);
-      el.querySelector('.ds').textContent = focus === 'all' ? `${Math.round(simAll(me, people[i]) * 100)}% same table` : describe(focus, people[i]);
+      el.style.opacity = (0.7 + 0.3 * ((s - lo) / (hi - lo || 1))).toFixed(2);
+      el.querySelector('.ds').textContent = focus === 'all' ? `${Math.round(simAll(me, people[i]) * 100)}%` : describe(focus, people[i]);
     });
     if (selected === null || focus !== 'all' || !seated.some(r => r.i === selected)) select(seated[0].i);
   };
@@ -789,12 +792,12 @@ function showMatch(d) {
       <div class="ft-seat theirs"><div class="ft-plate">${plateHTML(d)}</div><img class="ft-cut" src="${src('chopsticks')}" alt="" draggable="false"></div>
       <div class="ft-seat mine"><div class="ft-plate">${plateHTML(me)}</div><img class="ft-cut" src="${src('fork')}" alt="" draggable="false"></div>
     </div>
-    <p class="eyebrow">a table for two</p>
+    <p class="eyebrow">[ a table for two ]</p>
     <h3>${esc(me.name)} &amp; ${esc(d.name)}</h3>
     <p class="pct">${s}% same table</p>
-    <div class="tags">${tg.map(t => `<span class="tag">${t}</span>`).join('') || '<span class="tag">Opposites at one table</span>'}</div>
+    <div class="tags">${tg.slice(0, 3).map(t => `<span class="tag">${t}</span>`).join('') || '<span class="tag">Opposites at one table</span>'}</div>
     <hr class="divider" />
-    <p class="dish-label">a dish only you two would order</p>
+    <p class="dish-label">[ a dish only you two would order ]</p>
     <p class="dish">${esc(me.dish)} × ${esc(d.dish)}</p>
     <p class="mods">${fusedMods(me, d).join(' · ')}</p>
     <hr class="divider" />
