@@ -40,6 +40,10 @@ A = {
   "tablecloth": "A large round tablecloth seen from directly above, cream colored with a red and white gingham border.",
   "susan": "An empty round pale green glass lazy susan turntable seen from directly above.",
   "napkin": "A folded white paper napkin with a small red sauce stain.",
+  "fork": "One simple slim silver dinner fork lying vertically, tines pointing up, seen from directly above. The whole fork must be visible, including the rounded end of the long handle, with white margin above and below it. Paint it only in soft silvery grey and pale cool blue with white highlights, like plain stainless steel: one solid metal color, no patterns, no red, orange, yellow or green on it.",
+  "knife": "One simple silver dinner knife lying vertically, blade pointing up, seen from directly above. Paint it only in soft silvery grey and pale cool blue with white highlights, like plain stainless steel: one solid metal color, no patterns, no red, orange, yellow or green on it.",
+  "spoon": "One simple silver spoon lying vertically, bowl pointing up, seen from directly above. Paint it only in soft silvery grey and pale cool blue with white highlights, like plain stainless steel: one solid metal color, no patterns, no red, orange, yellow or green on it.",
+  "chopsticks": "A pair of plain light wooden chopsticks lying side by side vertically on a small red ceramic chopstick rest, seen from directly above.",
 }
 
 def gen(name, out):

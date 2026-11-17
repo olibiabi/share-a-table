@@ -377,3 +377,47 @@ svg { overflow: visible; }
   .feedback { min-height: 40px; }
   .table-screen { grid-template-columns: 1fr; }
 }
+
+/* ---------- intro: a table for two ---------- */
+.intro.two {
+  display: grid;
+  grid-template-columns: 1fr minmax(300px, 600px) 1fr;
+  gap: clamp(12px, 3vw, 40px);
+  align-items: center;
+  padding: 24px clamp(16px, 4vw, 48px) 48px;
+}
+.setting { width: 100%; max-width: 420px; justify-self: center; animation: settle 1s cubic-bezier(.3,1.3,.5,1) both; }
+.setting.theirs { animation-delay: .25s; }
+.setting-in { position: relative; aspect-ratio: 1.45; }
+.setting-in > img:first-child { position: absolute; left: 18%; top: 50%; width: 64%; transform: translateY(-50%); }
+.setting-in .cut { position: absolute; top: 50%; width: auto; transform: translateY(-50%); }
+.setting.theirs .setting-in { transform: rotate(180deg); }
+.setting.theirs .setting-in > img:first-child { opacity: .9; }
+.placecard {
+  position: absolute; left: 50%; bottom: -6%;
+  transform: translateX(-50%) rotate(-3deg);
+  background: #fffdf6; color: var(--ink);
+  font-family: 'Caveat', cursive; font-size: clamp(18px, 1.8vw, 24px); font-weight: 700; white-space: nowrap;
+  padding: 2px 14px 4px; border-radius: 3px; box-shadow: 2px 3px 0 rgba(43,35,33,.18);
+}
+.placecard.you { color: var(--tomato); }
+.setting.theirs .placecard { transform: translateX(-50%) rotate(183deg); }
+@keyframes settle { from { opacity: 0; transform: translateY(18px) rotate(-6deg); } }
+@media (max-width: 900px) {
+  .intro.two { grid-template-columns: 1fr; gap: 8px; }
+  .setting { max-width: 300px; }
+}
+
+/* ---------- lazy Susan: press and drag ---------- */
+.susan { touch-action: none; cursor: grab; }
+.susan.dragging { cursor: grabbing; transition: none; }
+.susan.dragging .token { transition: none; }
+
+/* ---------- match card: a table for two ---------- */
+.for-two { position: relative; width: min(230px, 82%); aspect-ratio: 1; margin: -4px auto 10px; }
+.for-two > img:first-child { width: 100%; display: block; }
+.ft-seat { position: absolute; left: 50%; width: 40%; transform: translate(-50%, -50%); }
+.ft-seat.theirs { top: 29%; transform: translate(-50%, -50%) rotate(180deg); }
+.ft-seat.mine { top: 71%; }
+.ft-cut { position: absolute; top: 12%; right: -16%; height: 76%; width: auto; }
+.menu-card .eyebrow { text-align: center; }

@@ -42,7 +42,7 @@ const toastFilter = t => `sepia(${Math.min(1, t * 1.4).toFixed(2)}) saturate(${(
 
 // preload so nothing pops in mid-game
 ['plate0', 'plate1', 'plate2', 'plate3', 'plate4', 'soup', 'cilantro', 'pizza', 'pineapple', 'pineapplebowl', 'bread', 'toaster',
-  'cerealbox', 'milk', 'bowlempty', 'bowlfull', 'egg', 'hotsauce', 'flame', 'chili', 'cake', 'strawberry', 'hull', 'pizzabox', 'pizzaboxclosed',
+  'cerealbox', 'milk', 'bowlempty', 'bowlfull', 'egg', 'hotsauce', 'flame', 'chili', 'cake', 'strawberry', 'hull', 'pizzabox', 'pizzaboxclosed', 'fork', 'knife', 'spoon', 'chopsticks',
   'slice', 'tomato', 'tablecloth', 'susan', 'napkin'].forEach(n => { new Image().src = src(n); });
 
 /* ---------- plates ---------- */
@@ -283,21 +283,28 @@ function addItem(stage, { x, y, w, name, cls = '', rot = 0 }) {
 /* =========================================================
    Screens
    ========================================================= */
+// one place setting: a plate with cutlery around it (western or chopsticks)
+function settingHTML(plateName, kind, extra = '') {
+  const side = kind === 'chopsticks'
+    ? `<img class="cut" src="${src('chopsticks')}" alt="" draggable="false" style="right:1%;height:78%">`
+    : `<img class="cut" src="${src('fork')}" alt="" draggable="false" style="left:4%;height:80%">
+       <img class="cut" src="${src('knife')}" alt="" draggable="false" style="right:9%;height:78%">
+       <img class="cut" src="${src('spoon')}" alt="" draggable="false" style="right:1%;height:78%">`;
+  return `<div class="setting-in">${img(plateName, '')}${side}${extra}</div>`;
+}
+
 function renderIntro() {
   setSteps(-1); setHeat(0);
   me = blank();
-  const bits = [
-    [9, 16, -12, 'tomato', 12], [86, 14, 14, 'strawberry', 9], [6, 66, 10, 'bread', 11], [90, 62, -18, 'chili', 9],
-    [22, 86, 20, 'pineapple', 8], [76, 86, -8, 'cilantro', 9], [68, 6, 6, 'egg', 9], [28, 8, 18, 'slice', 8],
-  ];
-  app.innerHTML = `<section class="intro">
-    ${bits.map(([x, y, r, n, w], i) => `<div class="scatter" style="left:${x}%;top:${y}%;width:clamp(70px, ${w}vw, 170px);rotate:${r}deg;animation-delay:${-i * 0.7}s">${img(n)}</div>`).join('')}
+  app.innerHTML = `<section class="intro two">
+    <div class="setting theirs">${settingHTML('plate4', 'chopsticks', '<span class="placecard">reserved for&nbsp;?</span>')}</div>
     <div class="intro-card">
       <p class="sub">same table, different plates</p>
       <h1>Share a <em>Table</em></h1>
-      <p class="lede">Eight small things to eat. No questions — just pick out, pour, shake and bite. Then the table rearranges itself around you, so you can see who you'd actually get along with.</p>
+      <p class="lede">A table for two — but who sits across from you? Eat eight small things. No questions: just pick out, pour, shake and bite. Then the table rearranges itself around you, and you'll see who you'd actually get along with.</p>
       <button class="btn" id="go">Take a seat</button>
     </div>
+    <div class="setting mine">${settingHTML('plate1', 'western', '<span class="placecard you">you</span>')}</div>
   </section>`;
   $('#go').onclick = renderPlateDraw;
 }
@@ -656,7 +663,7 @@ function renderTable() {
       <button class="btn ghost" id="again">eat again</button>
     </aside>
     <div class="table-wrap">
-      <p class="hint">Spin the lazy Susan — tap a dish, and the table rearranges around you.</p>
+      <p class="hint">Grab the lazy Susan and spin it — whichever dish stops in front of you, the table rearranges around it.</p>
       <p class="count" id="count"></p>
       <div class="table" id="table">
         <div class="cloth">${img('tablecloth')}</div>
@@ -722,21 +729,52 @@ function renderTable() {
   };
 
   const susan = $('#susan');
-  susan.addEventListener('click', e => {
-    const t = e.target.closest('.token');
-    if (!t) return;
-    susan.querySelectorAll('.token').forEach(x => x.classList.toggle('active', x === t));
-    if (t.dataset.i === 'all') { focus = 'all'; }
+  const tokens = [...susan.querySelectorAll('.token[data-i]:not(.center)')];
+  const setRot = r => { rot = r; susan.style.setProperty('--rot', rot + 'deg'); };
+  const norm = d => ((d % 360) + 540) % 360 - 180;
+  const choose = i => {
+    susan.querySelectorAll('.token').forEach(x => x.classList.remove('active'));
+    if (i === 'all') { focus = 'all'; $('.token.center', susan).classList.add('active'); }
     else {
-      const i = +t.dataset.i;
       focus = TOKENS[i].key;
-      // rotate so the chosen dish comes round to you (bottom); take the short way
-      const target = 180 - (i / TOKENS.length) * 360;
-      const delta = ((target - rot) % 360 + 540) % 360 - 180;
-      rot += delta;
-      susan.style.setProperty('--rot', rot + 'deg');
+      tokens[i].classList.add('active');
+      // turn so the chosen dish faces you (bottom), the short way round
+      setRot(rot + norm(180 - (i / TOKENS.length) * 360 - rot));
     }
     arrange();
+  };
+  // press and drag to spin; let go and it settles on the dish nearest to you
+  let drag = null, justDragged = false;
+  susan.addEventListener('pointerdown', e => {
+    if (e.target.closest('.token.center')) return;
+    const r = susan.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    drag = { cx, cy, a0: Math.atan2(e.clientY - cy, e.clientX - cx) * 180 / Math.PI, r0: rot, moved: 0, id: e.pointerId };
+    susan.setPointerCapture(e.pointerId);
+  });
+  susan.addEventListener('pointermove', e => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const a = Math.atan2(e.clientY - drag.cy, e.clientX - drag.cx) * 180 / Math.PI;
+    const d = norm(a - drag.a0);
+    drag.moved = Math.max(drag.moved, Math.abs(d));
+    if (drag.moved > 4) { susan.classList.add('dragging'); setRot(drag.r0 + d); drag.a0 = a; drag.r0 = rot; }
+  });
+  const endDrag = e => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const wasDrag = drag.moved > 4;
+    drag = null; susan.classList.remove('dragging');
+    if (!wasDrag) return;
+    justDragged = true; setTimeout(() => { justDragged = false; }, 50);
+    // which dish is now closest to the bottom (where you sit)?
+    let best = 0, bestD = 999;
+    TOKENS.forEach((_, i) => { const d = Math.abs(norm(-90 + i * 45 + rot - 90)); if (d < bestD) { bestD = d; best = i; } });
+    choose(best);
+  };
+  susan.addEventListener('pointerup', endDrag);
+  susan.addEventListener('pointercancel', endDrag);
+  susan.addEventListener('click', e => {
+    if (justDragged) return;
+    const t = e.target.closest('.token');
+    if (t) choose(t.dataset.i === 'all' ? 'all' : +t.dataset.i);
   });
   requestAnimationFrame(arrange);
 }
@@ -746,7 +784,12 @@ function showMatch(d) {
   const tg = tags(me, d);
   const same = me.theme === d.theme;
   $('#match').innerHTML = `<div class="menu-card">
-    <p class="eyebrow">tonight's menu for</p>
+    <div class="for-two">
+      ${img('tablecloth', '')}
+      <div class="ft-seat theirs"><div class="ft-plate">${plateHTML(d)}</div><img class="ft-cut" src="${src('chopsticks')}" alt="" draggable="false"></div>
+      <div class="ft-seat mine"><div class="ft-plate">${plateHTML(me)}</div><img class="ft-cut" src="${src('fork')}" alt="" draggable="false"></div>
+    </div>
+    <p class="eyebrow">a table for two</p>
     <h3>${esc(me.name)} &amp; ${esc(d.name)}</h3>
     <p class="pct">${s}% same table</p>
     <div class="tags">${tg.map(t => `<span class="tag">${t}</span>`).join('') || '<span class="tag">Opposites at one table</span>'}</div>
